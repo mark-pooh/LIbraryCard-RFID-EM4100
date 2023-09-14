@@ -104,6 +104,8 @@ namespace LibraryCard
                         {
                             txb_Message.Foreground = Brushes.Red;
                             txb_Message.Text = "User not found!";
+                            txt_Name.Clear();
+                            txt_Phone.Clear();
                             txt_Name.Focus();
                             btn_Register.Visibility = Visibility.Visible;
                         }
@@ -133,27 +135,46 @@ namespace LibraryCard
 
         private void Btn_Register_Click(object sender, RoutedEventArgs e)
         {
-            if(txt_Name.Text.Length > 0 && txt_Phone.Text.Length > 0)
+            if (txt_Name.Text.Length > 0 && txt_Phone.Text.Length > 0)
             {
-                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                try
                 {
-                    connection.Open();
-
-                    string insertQuery = "INSERT INTO Users (Id, Name, Phone) VALUES (@Id, @Name, @Phone)";
-
-                    using (SQLiteCommand command = new SQLiteCommand(insertQuery, connection))
+                    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                     {
-                        // Replace @Name and @Phone with the actual values you want to insert
-                        command.Parameters.AddWithValue("@Id", txt_CardID.Text);
-                        command.Parameters.AddWithValue("@Name", txt_Name.Text);
-                        command.Parameters.AddWithValue("@Phone", txt_Phone.Text);
+                        connection.Open();
 
-                        // Execute the INSERT query
-                        command.ExecuteNonQuery();
+                        string insertQuery = "INSERT INTO Users (Id, Name, Phone) VALUES (@Id, @Name, @Phone)";
+
+                        using (SQLiteCommand command = new SQLiteCommand(insertQuery, connection))
+                        {
+                            // Replace @Name and @Phone with the actual values you want to insert
+                            command.Parameters.AddWithValue("@Id", txt_CardID.Text);
+                            command.Parameters.AddWithValue("@Name", txt_Name.Text);
+                            command.Parameters.AddWithValue("@Phone", txt_Phone.Text);
+
+                            // Execute the INSERT query
+                            command.ExecuteNonQuery();
+
+                            MessageBox.Show("Successfully registered!");
+                        }
+
+                        connection.Close();
                     }
-
-                    connection.Close();
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Unable to register user.\n {ex}");
+                }
+            }
+            else if (txt_Name.Text.Length == 0)
+            {
+                MessageBox.Show("Please insert user name.");
+                txt_Name.Focus();
+            }
+            else if(txt_Phone.Text.Length == 0)
+            {
+                MessageBox.Show("Please insert user phone.");
+                txt_Phone.Focus();
             }
         }
     }
